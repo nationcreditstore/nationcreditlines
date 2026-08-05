@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogs & News - Nation Credit Lines</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #0b0b10; color: #ffffff; overflow-x: hidden; }
+        
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 18px 30px; border-bottom: 1px solid #1f2233; background: #0f1016; position: sticky; top: 0; z-index: 1000; }
+        .logo-container { font-weight: 700; font-size: 16px; text-decoration: none; color: #fff; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        
+        /* Content Wrapper */
+        .page-content-wrapper { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+        .main-heading { font-size: 32px; font-weight: 800; margin-bottom: 30px; color: #fff; text-align: center; background: linear-gradient(90deg, #fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Responsive Blog Grid */
+        .blog-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 30px; padding-bottom: 40px; }
+        @media (min-width: 640px) { .blog-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1024px) { .blog-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        /* Blog Card Style */
+        .blog-card { background: #13151f; border: 1px solid #23263a; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.2s ease, border-color 0.2s ease; }
+        .blog-card:hover { transform: translateY(-4px); border-color: #7c3aed; }
+        
+        .blog-banner { padding: 25px 20px; background: linear-gradient(135deg, #1e1b4b 0%, #0f1016 100%); border-bottom: 1px solid #23263a; color: #fff; display: flex; flex-direction: column; gap: 8px; }
+        .blog-banner-tag { font-size: 10px; font-weight: 800; color: #a78bfa; letter-spacing: 1px; text-transform: uppercase; }
+        .blog-banner-title { font-size: 15px; font-weight: 800; line-height: 1.3; color: #fff; }
+
+        .blog-content { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .blog-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: #f3f4f6; line-height: 1.4; }
+        .blog-excerpt { font-size: 13px; color: #9ca3af; line-height: 1.6; margin-bottom: 20px; }
+        
+        .read-more-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #a78bfa; background: none; border: none; cursor: pointer; transition: color 0.2s; padding: 0; }
+        .read-more-btn:hover { color: #c4b5fd; }
+
+        /* Pagination */
+        .pagination-container { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 40px; margin-bottom: 60px; }
+        .page-num { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #13151f; border: 1px solid #23263a; border-radius: 8px; color: #d1d5db; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .page-num:hover, .page-num.active { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+
+        /* Article Modal Overlay */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 3000; backdrop-filter: blur(5px); justify-content: center; align-items: center; padding: 20px; }
+        .modal-card { background: #13151f; border: 1px solid #2d3148; border-radius: 16px; max-width: 800px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.7); position: relative; }
+        .modal-close { position: absolute; top: 20px; right: 20px; background: #1f2233; border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .modal-close:hover { background: #7c3aed; }
+        .modal-title { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 15px; line-height: 1.3; }
+        .modal-meta { font-size: 12px; color: #a78bfa; margin-bottom: 25px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .modal-body { font-size: 14px; color: #d1d5db; line-height: 1.8; display: flex; flex-direction: column; gap: 15px; }
+
+        /* Cart Item Styling in Drawer */
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #1f2233; padding-bottom: 10px; font-size: 13px; color: #d1d5db; }
+
+        /* Drawers */
+        .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 2000; backdrop-filter: blur(4px); }
+        .drawer { position: fixed; top: 0; left: -320px; width: 300px; height: 100%; background: #13151f; color: #fff; box-shadow: 4px 0 15px rgba(0,0,0,0.5); z-index: 2001; transition: left 0.3s ease; display: flex; flex-direction: column; border-right: 1px solid #23263a; }
+        .drawer.right { left: auto; right: -320px; border-right: none; border-left: 1px solid #23263a; }
+        .drawer.open { left: 0; }
+        .drawer.right.open { right: 0; }
+        
+        .drawer-header { padding: 20px; border-bottom: 1px solid #23263a; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 18px; }
+        .drawer-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #9ca3af; }
+        .drawer-body { padding: 20px; overflow-y: auto; flex: 1; }
+        
+        .menu-list { list-style: none; padding: 0; }
+        .menu-list li { padding: 12px 0; border-bottom: 1px solid #1f2233; }
+        .menu-list li a { text-decoration: none; color: #d1d5db; font-size: 15px; font-weight: 500; display: block; }
+        .menu-list li a:hover { color: #fff; }
+
+        footer { background-color: #090a0f; color: #6b7280; padding: 50px 30px; margin-top: 60px; font-size: 14px; border-top: 1px solid #1f2233; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeAllDrawers()"></div>
+
+    <!-- Article Modal -->
+    <div class="modal-overlay" id="articleModal" onclick="closeModalOutside(event)">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeArticleModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-meta" id="modalCategory">Financial Guide</div>
+            <div class="modal-title" id="modalTitle">Article Title</div>
+            <div class="modal-body" id="modalBodyText">
+                <!-- Full article content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Drawer -->
+    <div class="drawer" id="menuDrawer">
+        <div class="drawer-header">
+            <span>Menu</span>
+            <button class="drawer-close" onclick="toggleMenuDrawer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-body">
+            <ul class="menu-list">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="tradelines.html">Primary Tradelines</a></li>
+                <li><a href="cpn.html">CPN Packages</a></li>
+                <li><a href="credit-lines.html">Credit Lines</a></li>
+                <li><a href="documents.html">Documents</a></li>
+                <li><a href="blogs.html">Blogs</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div class="drawer right" id="cartDrawer">
+        <div class="drawer-header">
+            <span>Your Cart</span>
+            <button class="drawer-close" onclick="toggleCartDrawer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-body" id="cartDrawerBody">
+            <p style="color: #9ca3af; font-size: 14px;">Your cart is empty.</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div style="font-size: 20px; cursor: pointer;" onclick="toggleMenuDrawer()"><i class="fa-solid fa-bars"></i></div>
+        <a href="index.html" class="logo-container">
+            <i class="fa-solid fa-shield-halved" style="color: #a78bfa;"></i> NATIONCREDITLINES
+        </a>
+        <div style="position: relative; cursor: pointer; font-size: 20px;" onclick="toggleCartDrawer()">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span id="cartBadgeCount" style="position: absolute; top: -6px; right: -8px; background: #7c3aed; color: white; font-size: 10px; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">0</span>
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-content-wrapper">
+        <h1 class="main-heading">News & Articles</h1>
+
+        <!-- Blog Grid -->
+        <div class="blog-grid" id="blogGrid"></div>
+
+        <!-- Pagination Bar -->
+        <div class="pagination-container" id="paginationContainer"></div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Nation Credit Lines. All rights reserved. Secure 256-bit SSL Encrypted.</p>
+    </footer>
+
+    <script>
+        const CART_KEY = 'nation_cart';
+        let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+
+        function updateCartUI() {
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartBadgeCount').innerText = totalCount;
+
+            const cartBody = document.getElementById('cartDrawerBody');
+            if (cart.length === 0) {
+                cartBody.innerHTML = '<p style="color: #9ca3af; font-size: 14px;">Your cart is empty.</p>';
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+            cart.forEach(item => {
+                let itemTotal = item.price * item.qty;
+                total += itemTotal;
+                html += `
+                    <div class="cart-item">
+                        <div>
+                            <div style="font-weight: 600; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${item.title}</div>
+                            <div style="color: #9ca3af;">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
+                        </div>
+                        <div style="font-weight: 700; color: #34d399;">$${itemTotal.toFixed(2)}</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                <div style="margin-top: 20px; border-top: 2px solid #23263a; padding-top: 15px; display: flex; justify-content: space-between; font-weight: 700; font-size: 16px;">
+                    <span>Total:</span>
+                    <span style="color: #34d399;">$${total.toFixed(2)} USD</span>
+                </div>
+                <a href="checkout.html" style="display: block; text-align: center; text-decoration: none; width: 100%; margin-top: 20px; background: #7c3aed; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Proceed to Checkout</a>
+            `;
+            cartBody.innerHTML = html;
+        }
+
+        const allBlogs = [
+            {
+                id: 1,
+                category: "Loan Approval Guide",
+                title: "Step-by-Step Guide: How to Successfully Apply for a Loan in 2026",
+                excerpt: "Applying for a loan can be a daunting process, but with the right knowledge and preparation, it can be...",
+                content: [
+                    "Applying for a loan can be a daunting process, but with the right knowledge and preparation, it can become a straightforward path to achieving your financial goals. Whether you are looking for personal funding, automotive financing, or real estate backing, preparation is key.",
+                    "Step 1: Check your credit score and reports. Lenders pull tri-merged reports to evaluate risk. Ensuring your credit profile is optimized and clean of inaccurate public records significantly boosts approval odds.",
+                    "Step 2: Gather necessary documentation beforehand. Having proper income documentation, bank statements, and verification details ready accelerates underwriting.",
+                    "Step 3: Choose the right lender matching your financial profile. Working with seasoned credit experts ensures your applications align with institutional requirements for fast approval."
+                ]
+            },
+            {
+                id: 2,
+                category: "Financial Planning",
+                title: "Practical Steps to Obtaining a Loan in the Year 2026",
+                excerpt: "Obtaining a loan can be a practical solution to fulfill financial needs, whether it's for purchasing a new house, starting a business...",
+                content: [
+                    "Obtaining a loan can be a practical solution to fulfill financial needs, whether it's for purchasing a new house, starting a business, or funding higher education.",
+                    "In 2026, lenders have adapted strict algorithmic screening. To navigate this successfully, applicants must focus on debt-to-income ratios and proper identity verification.",
+                    "Establishing primary tradelines and robust credit lines beforehand provides the necessary foundation. Our packages at Nation Credit Lines are specifically engineered to streamline this exact requirement."
+                ]
+            },
+            {
+                id: 3,
+                category: "Credit Strategy",
+                title: "Securing Your Financial Future: How to Obtain a Loan in 2026",
+                excerpt: "Understanding the Loan Application Process When it comes to securing your financial future, obtaining a loan can be a...",
+                content: [
+                    "Understanding the Loan Application Process is essential when it comes to securing your financial future.",
+                    "Lenders look closely at consistency, history, and liquidity. Ensuring that your financial profiles reflect high trust limits and minimal utilization scores will position you as a prime candidate for top-tier approvals.",
+                    "Take advantage of professional packages that incorporate authorized user tradelines and seasoned credit files to fast-track your approval status."
+                ]
+            },
+            {
+                id: 4,
+                category: "Real Estate & Auto",
+                title: "Your Roadmap to Loan Approval: A 2026 Comprehensive Guide",
+                excerpt: "When it comes to getting a loan, the road to approval can often feel overwhelming and confusing. In this comprehensive guide...",
+                content: [
+                    "When it comes to getting a loan, the road to approval can often feel overwhelming and confusing. In this comprehensive guide, we will provide you with the necessary steps and framework.",
+                    "From personal credit health to business structuring, every detail matters. We break down how credit lines, primary tradelines, and verified documents work together to create a bulletproof application profile.",
+                    "Follow our expert recommendations to bypass standard rejection hurdles and secure high-limit funding successfully."
+                ]
+            },
+            {
+                id: 5,
+                category: "Funding Solutions",
+                title: "Unlocking Your Financial Potential: How to Secure a Loan in 2026",
+                excerpt: "Understanding the Loan Landscape Securing a loan in 2026 requires a comprehensive understanding of the evolving financial landscape...",
+                content: [
+                    "Understanding the Loan Landscape: Securing a loan requires a comprehensive understanding of the evolving financial requirements across major financial institutions.",
+                    "By leveraging specialized funding packages, tradelines, and established credit profiles, you eliminate the guesswork and drastically reduce approval turnaround times.",
+                    "Connect with our support team to discover which funding package best fits your short-term and long-term financial objectives."
+                ]
+            },
+            {
+                id: 6,
+                category: "Credit Requirements",
+                title: "Navigating the Loan Process: A Guide for 2026",
+                excerpt: "Understanding Loan Requirements When applying for a loan, it is crucial to understand the requirements set by lenders...",
+                content: [
+                    "Understanding Loan Requirements: When applying for a loan, it is crucial to understand the criteria set by underwriters. Key factors include credit depth, payment history, and profile age.",
+                    "Using pre-packaged credit lines and verified documents ensures your profile meets every underwriting metric required for high-tier capital release.",
+                    "Stay informed, prepare your documents accurately, and execute your funding strategy with confidence."
+                ]
+            },
+            {
+                id: 7,
+                category: "Business Credit",
+                title: "Building Business Credit Lines from Scratch in 2026",
+                excerpt: "Discover how to establish corporate credit separate from your personal identity to secure massive business loans...",
+                content: [
+                    "Building Business Credit is one of the most powerful moves an entrepreneur can make. Separating personal liability from corporate assets protects your personal financial health while unlocking high-limit commercial lines.",
+                    "Key steps include establishing a clean corporate entity, acquiring business tradelines, and maintaining positive financial reporting.",
+                    "Explore our Business Credit Line packages to get fully pre-approved corporate profiles ready for immediate funding."
+                ]
+            },
+            {
+                id: 8,
+                category: "Advanced Funding",
+                title: "Maximizing Approval Limits with Tri-Merged Profiles",
+                excerpt: "Learn how tri-merged credit reports impact your borrowing power and how to optimize all three major bureaus...",
+                content: [
+                    "A tri-merged credit report pulls data from Equifax, Experian, and TransUnion simultaneously. Lenders use these combined scores to determine your maximum lending limit.",
+                    "Maintaining balanced scores across all three bureaus ensures you never get declined due to a discrepancy on a single report.",
+                    "Our specialized packages are designed specifically to be tri-merged and fully optimized for maximum lending power."
+                ]
+            }
+        ];
+
+        const itemsPerPage = 6;
+        let currentPage = 1;
+
+        function renderBlogs(page) {
+            currentPage = page;
+            const startIndex = (page - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentItems = allBlogs.slice(startIndex, endIndex);
+
+            const grid = document.getElementById('blogGrid');
+            grid.innerHTML = currentItems.map(blog => `
+                <div class="blog-card">
+                    <div>
+                        <div class="blog-banner">
+                            <div class="blog-banner-tag"><i class="fa-solid fa-shield-halved"></i> ${blog.category}</div>
+                            <div class="blog-banner-title">NATION CREDIT LINES BLOG</div>
+                        </div>
+                        <div class="blog-content">
+                            <div>
+                                <div class="blog-title">${blog.title}</div>
+                                <div class="blog-excerpt">${blog.excerpt}</div>
+                            </div>
+                            <button class="read-more-btn" onclick="openArticleModal(${blog.id})">Read More <i class="fa-solid fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(allBlogs.length / itemsPerPage);
+            const container = document.getElementById('paginationContainer');
+            
+            let html = '';
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<button class="page-num ${i === currentPage ? 'active' : ''}" onclick="renderBlogs(${i})">${i}</button>`;
+            }
+            if (totalPages > 1 && currentPage < totalPages) {
+                html += `<button class="page-num" onclick="renderBlogs(${currentPage + 1})"><i class="fa-solid fa-chevron-right"></i></button>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function openArticleModal(id) {
+            const blog = allBlogs.find(b => b.id === id);
+            if (blog) {
+                document.getElementById('modalCategory').innerText = blog.category;
+                document.getElementById('modalTitle').innerText = blog.title;
+                document.getElementById('modalBodyText').innerHTML = blog.content.map(p => `<p>${p}</p>`).join('');
+                document.getElementById('articleModal').style.display = 'flex';
+            }
+        }
+
+        function closeArticleModal() {
+            document.getElementById('articleModal').style.display = 'none';
+        }
+
+        function closeModalOutside(event) {
+            if (event.target === document.getElementById('articleModal')) {
+                closeArticleModal();
+            }
+        }
+
+        function toggleMenuDrawer() { document.getElementById('menuDrawer').classList.toggle('open'); updateOverlay(); }
+        function toggleCartDrawer() { document.getElementById('cartDrawer').classList.toggle('open'); updateOverlay(); }
+        
+        function closeAllDrawers() {
+            document.getElementById('menuDrawer').classList.remove('open');
+            document.getElementById('cartDrawer').classList.remove('open');
+            document.getElementById('drawerOverlay').style.display = 'none';
+        }
+
+        function updateOverlay() {
+            const isMenuOpen = document.getElementById('menuDrawer').classList.contains('open');
+            const isCartOpen = document.getElementById('cartDrawer').classList.contains('open');
+            document.getElementById('drawerOverlay').style.display = (isMenuOpen || isCartOpen) ? 'block' : 'none';
+        }
+
+        // Initial Load
+        renderBlogs(1);
+        updateCartUI();
+    </script>
+</body>
+</html>

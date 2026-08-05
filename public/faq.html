@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Nation Credit Lines</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #0b0b10; color: #ffffff; overflow-x: hidden; }
+       
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 18px 30px; border-bottom: 1px solid #1f2233; background: #0f1016; position: sticky; top: 0; z-index: 1000; }
+        .logo-container { font-weight: 700; font-size: 16px; text-decoration: none; color: #fff; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+       
+        /* Content Wrapper */
+        .page-content-wrapper { max-width: 900px; margin: 0 auto; padding: 50px 20px; }
+        .main-heading { font-size: 32px; font-weight: 800; margin-bottom: 10px; color: #fff; text-align: center; background: linear-gradient(90deg, #fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sub-heading { font-size: 14px; color: #9ca3af; text-align: center; margin-bottom: 35px; }
+
+        /* Search Bar */
+        .search-box { position: relative; margin-bottom: 30px; }
+        .search-box input { width: 100%; padding: 14px 20px 14px 45px; background: #13151f; border: 1px solid #23263a; border-radius: 12px; color: #fff; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .search-box input:focus { border-color: #7c3aed; }
+        .search-box i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 16px; }
+
+        /* Category Filter Pills */
+        .filter-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; }
+        .filter-pill { padding: 8px 16px; background: #13151f; border: 1px solid #23263a; border-radius: 20px; color: #9ca3af; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .filter-pill:hover, .filter-pill.active { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+
+        /* FAQ Accordion List */
+        .faq-list { display: flex; flex-direction: column; gap: 15px; }
+        .faq-item { background: #13151f; border: 1px solid #23263a; border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
+        .faq-item:hover { border-color: #3f3f46; }
+       
+        .faq-question { padding: 20px; display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 700; color: #f3f4f6; cursor: pointer; gap: 15px; }
+        .faq-question i { color: #a78bfa; transition: transform 0.3s ease; font-size: 14px; }
+       
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0 20px; font-size: 14px; color: #9ca3af; line-height: 1.6; border-top: 1px solid transparent; }
+       
+        .faq-item.active { border-color: #7c3aed; }
+        .faq-item.active .faq-question i { transform: rotate(180deg); }
+        .faq-item.active .faq-answer { max-height: 200px; padding: 15px 20px 20px 20px; border-top-color: #1f2233; }
+
+        /* Cart Item Styling in Drawer */
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #1f2233; padding-bottom: 10px; font-size: 13px; color: #d1d5db; }
+
+        /* Drawers */
+        .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 2000; backdrop-filter: blur(4px); }
+        .drawer { position: fixed; top: 0; left: -320px; width: 300px; height: 100%; background: #13151f; color: #fff; box-shadow: 4px 0 15px rgba(0,0,0,0.5); z-index: 2001; transition: left 0.3s ease; display: flex; flex-direction: column; border-right: 1px solid #23263a; }
+        .drawer.right { left: auto; right: -320px; border-right: none; border-left: 1px solid #23263a; }
+        .drawer.open { left: 0; }
+        .drawer.right.open { right: 0; }
+       
+        .drawer-header { padding: 20px; border-bottom: 1px solid #23263a; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 18px; }
+        .drawer-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #9ca3af; }
+        .drawer-body { padding: 20px; overflow-y: auto; flex: 1; }
+       
+        .menu-list { list-style: none; padding: 0; }
+        .menu-list li { padding: 12px 0; border-bottom: 1px solid #1f2233; }
+        .menu-list li a { text-decoration: none; color: #d1d5db; font-size: 15px; font-weight: 500; display: block; }
+        .menu-list li a:hover { color: #fff; }
+
+        footer { background-color: #090a0f; color: #6b7280; padding: 50px 30px; margin-top: 60px; font-size: 14px; border-top: 1px solid #1f2233; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeAllDrawers()"></div>
+
+    <!-- Menu Drawer -->
+    <div class="drawer" id="menuDrawer">
+        <div class="drawer-header">
+            <span>Menu</span>
+            <button class="drawer-close" onclick="toggleMenuDrawer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-body">
+            <ul class="menu-list">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="tradelines.html">Primary Tradelines</a></li>
+                <li><a href="cpn.html">CPN Packages</a></li>
+                <li><a href="credit-lines.html">Credit Lines</a></li>
+                <li><a href="documents.html">Documents</a></li>
+                <li><a href="blogs.html">Blogs</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div class="drawer right" id="cartDrawer">
+        <div class="drawer-header">
+            <span>Your Cart</span>
+            <button class="drawer-close" onclick="toggleCartDrawer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-body" id="cartDrawerBody">
+            <p style="color: #9ca3af; font-size: 14px;">Your cart is empty.</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div style="font-size: 20px; cursor: pointer;" onclick="toggleMenuDrawer()"><i class="fa-solid fa-bars"></i></div>
+        <a href="index.html" class="logo-container">
+            <i class="fa-solid fa-shield-halved" style="color: #a78bfa;"></i> NATIONCREDITLINES
+        </a>
+        <div style="position: relative; cursor: pointer; font-size: 20px;" onclick="toggleCartDrawer()">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span id="cartBadgeCount" style="position: absolute; top: -6px; right: -8px; background: #7c3aed; color: white; font-size: 10px; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">0</span>
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-content-wrapper">
+        <h1 class="main-heading">Frequently Asked Questions</h1>
+        <p class="sub-heading">Find quick answers regarding our tradelines, packages, and processing times.</p>
+
+        <!-- Search Bar -->
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="faqSearch" placeholder="Search for answers..." onkeyup="filterFAQs()">
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="filter-container">
+            <button class="filter-pill active" onclick="setCategory('all', this)">All Questions</button>
+            <button class="filter-pill" onclick="setCategory('general', this)">General</button>
+            <button class="filter-pill" onclick="setCategory('tradelines', this)">Tradelines</button>
+            <button class="filter-pill" onclick="setCategory('cpn', this)">CPN Packages</button>
+            <button class="filter-pill" onclick="setCategory('credit', this)">Credit Lines</button>
+        </div>
+
+        <!-- FAQ List -->
+        <div class="faq-list" id="faqList">
+            <!-- Items rendered via JavaScript -->
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Nation Credit Lines. All rights reserved. Secure 256-bit SSL Encrypted.</p>
+    </footer>
+
+    <script>
+        const CART_KEY = 'nation_cart';
+        let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+
+        function updateCartUI() {
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartBadgeCount').innerText = totalCount;
+
+            const cartBody = document.getElementById('cartDrawerBody');
+            if (cart.length === 0) {
+                cartBody.innerHTML = '<p style="color: #9ca3af; font-size: 14px;">Your cart is empty.</p>';
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+            cart.forEach(item => {
+                let itemTotal = item.price * item.qty;
+                total += itemTotal;
+                html += `
+                    <div class="cart-item">
+                        <div>
+                            <div style="font-weight: 600; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${item.title}</div>
+                            <div style="color: #9ca3af;">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
+                        </div>
+                        <div style="font-weight: 700; color: #34d399;">$${itemTotal.toFixed(2)}</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                <div style="margin-top: 20px; border-top: 2px solid #23263a; padding-top: 15px; display: flex; justify-content: space-between; font-weight: 700; font-size: 16px;">
+                    <span>Total:</span>
+                    <span style="color: #34d399;">$${total.toFixed(2)} USD</span>
+                </div>
+                <a href="checkout.html" style="display: block; text-align: center; text-decoration: none; width: 100%; margin-top: 20px; background: #7c3aed; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Proceed to Checkout</a>
+            `;
+            cartBody.innerHTML = html;
+        }
+
+        const faqs = [
+            {
+                category: "general",
+                question: "What is Nation Credit Lines?",
+                answer: "Nation Credit Lines is a premier financial solutions provider specializing in authorized user tradelines, verified profile packages, institutional credit lines, and document structuring designed to optimize financial profiles."
+            },
+            {
+                category: "general",
+                question: "How long does order processing take?",
+                answer: "Most digital orders and standard packages are processed and delivered securely within 24 to 48 hours after successful checkout verification."
+            },
+            {
+                category: "tradelines",
+                question: "What is an Authorized User Tradeline?",
+                answer: "An authorized user tradeline allows you to be added to an existing credit card account with a clean payment history and high limit. Once reported to the credit bureaus, the positive history mirrors onto your personal credit report, boosting your score."
+            },
+            {
+                category: "tradelines",
+                question: "How long do tradelines stay on my credit report?",
+                answer: "Tradelines typically report for a billing cycle of 2 to 3 reporting cycles (approx. 60–90 days), giving your score an immediate and sustained upward push before cycling off per standard bureau guidelines."
+            },
+            {
+                category: "cpn",
+                question: "What is included in a CPN Package?",
+                answer: "Our CPN packages include fully formatted, clean alternative credit profile numbers accompanied by comprehensive setup instructions, credit-building guides, and compliance safeguards."
+            },
+            {
+                category: "cpn",
+                question: "Are your CPN profiles clean and ready to use?",
+                answer: "Yes, all profiles are thoroughly verified, checked against active public records, and structured to ensure zero prior derogatory activity or inquiry history."
+            },
+            {
+                category: "credit",
+                question: "What are primary credit lines?",
+                answer: "Primary credit lines are accounts where you are the primary account holder rather than an authorized user. These carry massive weight with lenders and establish true independent corporate or personal credit depth."
+            },
+            {
+                category: "general",
+                question: "What payment methods do you accept?",
+                answer: "We securely process transactions through major cryptocurrency networks (Bitcoin, USDT, BNB) and secure automated checkout protocols to protect your privacy and ensure instant order confirmation."
+            }
+        ];
+
+        let currentCategory = 'all';
+
+        function renderFAQs(filterText = '') {
+            const listEl = document.getElementById('faqList');
+            const searchVal = filterText.toLowerCase();
+
+            const filtered = faqs.filter(faq => {
+                const matchesCat = currentCategory === 'all' || faq.category === currentCategory;
+                const matchesSearch = faq.question.toLowerCase().includes(searchVal) || faq.answer.toLowerCase().includes(searchVal);
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `<p style="text-align: center; color: #9ca3af; padding: 30px;">No matching questions found.</p>`;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map((faq, index) => `
+                <div class="faq-item" id="faq-item-${index}">
+                    <div class="faq-question" onclick="toggleFAQ(${index})">
+                        <span>${faq.question}</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>${faq.answer}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleFAQ(index) {
+            const item = document.getElementById(`faq-item-${index}`);
+            const wasActive = item.classList.contains('active');
+           
+            document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+           
+            if (!wasActive) {
+                item.classList.add('active');
+            }
+        }
+
+        function setCategory(category, btnElement) {
+            currentCategory = category;
+            document.querySelectorAll('.filter-pill').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+           
+            const searchInput = document.getElementById('faqSearch').value;
+            renderFAQs(searchInput);
+        }
+
+        function filterFAQs() {
+            const searchInput = document.getElementById('faqSearch').value;
+            renderFAQs(searchInput);
+        }
+
+        function toggleMenuDrawer() { document.getElementById('menuDrawer').classList.toggle('open'); updateOverlay(); }
+        function toggleCartDrawer() { document.getElementById('cartDrawer').classList.toggle('open'); updateOverlay(); }
+       
+        function closeAllDrawers() {
+            document.getElementById('menuDrawer').classList.remove('open');
+            document.getElementById('cartDrawer').classList.remove('open');
+            document.getElementById('drawerOverlay').style.display = 'none';
+        }
+
+        function updateOverlay() {
+            const isMenuOpen = document.getElementById('menuDrawer').classList.contains('open');
+            const isCartOpen = document.getElementById('cartDrawer').classList.contains('open');
+            document.getElementById('drawerOverlay').style.display = (isMenuOpen || isCartOpen) ? 'block' : 'none';
+        }
+
+        // Initial Load
+        renderFAQs();
+        updateCartUI();
+    </script>
+</body>
+</html>

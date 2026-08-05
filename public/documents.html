@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents - Nation Credit Lines</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #0b0b10; color: #ffffff; overflow-x: hidden; }
+        
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 18px 30px; border-bottom: 1px solid #1f2233; background: #0f1016; position: sticky; top: 0; z-index: 1000; }
+        .logo-container { font-weight: 700; font-size: 16px; text-decoration: none; color: #fff; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        
+        /* Content Wrapper */
+        .page-content-wrapper { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+        .main-heading { font-size: 32px; font-weight: 800; margin-bottom: 15px; color: #fff; text-align: center; background: linear-gradient(90deg, #fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .description-text { font-size: 15px; color: #9ca3af; line-height: 1.6; margin-bottom: 40px; text-align: center; max-width: 800px; margin-left: auto; margin-right: auto; }
+        
+        .filter-sort-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; font-size: 14px; color: #d1d5db; font-weight: 500; border-top: 1px solid #1f2233; border-bottom: 1px solid #1f2233; padding: 15px 20px; background: #13151f; border-radius: 8px; cursor: pointer; transition: border-color 0.2s; }
+        .filter-sort-bar:hover { border-color: #7c3aed; }
+
+        /* Filter Controls Box */
+        .filter-panel { background: #13151f; border: 1px solid #23263a; border-radius: 12px; padding: 20px; margin-bottom: 30px; display: none; gap: 20px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+        .filter-panel.open { display: flex; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+        .filter-group label { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; }
+        .filter-group select { background: #0f1016; border: 1px solid #2d3148; color: #fff; padding: 10px; border-radius: 6px; outline: none; font-size: 14px; }
+        .filter-group select:focus { border-color: #7c3aed; }
+
+        /* Responsive Product Grid */
+        .product-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 25px; padding-bottom: 60px; }
+        @media (min-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1024px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1280px) { .product-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        /* Product Card Style */
+        .product-card { background: #13151f; border: 1px solid #23263a; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.2s ease, border-color 0.2s ease; }
+        .product-card:hover { transform: translateY(-4px); border-color: #7c3aed; }
+        
+        .card-graphic-container { padding: 20px 16px 10px 16px; background: linear-gradient(135deg, #181b2e 0%, #0f1016 100%); border-bottom: 1px solid #23263a; position: relative; }
+        
+        .promo-badge { font-size: 10px; font-weight: 800; color: #a78bfa; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+        .promo-title { font-size: 15px; font-weight: 900; color: #ffffff; line-height: 1.2; margin-bottom: 10px; text-align: center; }
+        
+        /* Simulated Document Spec Box matching screenshots */
+        .doc-spec-box { background: #000000; border: 1px solid #2d3148; border-radius: 6px; padding: 10px; margin-bottom: 12px; font-family: monospace; font-size: 10px; color: #d1d5db; line-height: 1.5; }
+        .doc-spec-box div { margin-bottom: 2px; }
+
+        /* Simulated Card / Graphic Box */
+        .simulated-card { width: 100%; height: 70px; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.3); margin-top: 8px; }
+        .card-doc { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #fff; }
+        .card-top-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 700; }
+        .card-bottom-row { display: flex; justify-content: space-between; align-items: flex-end; font-size: 10px; }
+
+        /* Product Info Footer */
+        .product-info { padding: 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .product-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #f3f4f6; line-height: 1.4; }
+        .product-price { font-size: 18px; font-weight: 800; color: #34d399; margin-bottom: 14px; }
+
+        /* Quantity Selector Box */
+        .qty-box { display: flex; align-items: center; justify-content: space-between; border: 1px solid #2d3148; border-radius: 8px; overflow: hidden; background: #0f1016; margin: 0 16px 16px 16px; }
+        .qty-btn { background: #181b2e; border: none; width: 40px; height: 40px; font-size: 16px; font-weight: 600; cursor: pointer; color: #fff; }
+        .qty-btn:hover { background: #23263a; }
+        .qty-value { font-size: 15px; font-weight: 600; color: #fff; }
+
+        /* Drawers */
+        .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 2000; backdrop-filter: blur(4px); }
+        .drawer { position: fixed; top: 0; left: -320px; width: 300px; height: 100%; background: #13151f; color: #fff; box-shadow: 4px 0 15px rgba(0,0,0,0.5); z-index: 2001; transition: left 0.3s ease; display: flex; flex-direction: column; border-right: 1px solid #23263a; }
+        .drawer.right { left: auto; right: -320px; border-right: none; border-left: 1px solid #23263a; }
+        .drawer.open { left: 0; }
+        .drawer.right.open { right: 0; }
+        
+        .drawer-header { padding: 20px; border-bottom: 1px solid #23263a; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 18px; }
+        .drawer-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #9ca3af; }
+        .drawer-body { padding: 20px; overflow-y: auto; flex: 1; }
+        
+        .menu-list { list-style: none; padding: 0; }
+        .menu-list li { padding: 12px 0; border-bottom: 1px solid #1f2233; }
+        .menu-list li a { text-decoration: none; color: #d1d5db; font-size: 15px; font-weight: 500; display: block; }
+        .menu-list li a:hover { color: #fff; }
+
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #1f2233; padding-bottom: 10px; font-size: 13px; color: #d1d5db; }
+
+        footer { background-color: #090a0f; color: #6b7280; padding: 50px 30px; margin-top: 60px; font-size: 14px; border-top: 1px solid #1f2233; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeAllDrawers()"></div>
+
+    <!-- Menu Drawer -->
+    <div class="drawer" id="menuDrawer">
+        <div class="drawer-header">
+            <span>Menu</span>
+            <button class="drawer-close" onclick="toggleMenuDrawer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-body">
+            <ul class="menu-list">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="tradelines.html">Primary Tradelines</a></li>
+                <li><a href="cpn.html">CPN Packages</a></li>
+                <li><a href="credit-lines.html">Credit Lines</a></li>
+                <li><a href="documents.html">Documents</a></li>
+                <li><a href="blogs.html">Blogs</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div class="drawer right" id="cartDrawer">
+        <div class="drawer-header">
+            <span>Your Cart</span>
+            <button class="drawer-close" onclick="toggleCartDrawer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-body" id="cartDrawerBody">
+            <p style="color: #9ca3af; font-size: 14px;">Your cart is empty.</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div style="font-size: 20px; cursor: pointer;" onclick="toggleMenuDrawer()"><i class="fa-solid fa-bars"></i></div>
+        <a href="index.html" class="logo-container">
+            <i class="fa-solid fa-shield-halved" style="color: #a78bfa;"></i> NATIONCREDITLINES
+        </a>
+        <div style="position: relative; cursor: pointer; font-size: 20px;" onclick="toggleCartDrawer()">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span id="cartBadgeCount" style="position: absolute; top: -6px; right: -8px; background: #7c3aed; color: white; font-size: 10px; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">0</span>
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-content-wrapper">
+        <h1 class="main-heading">Documents</h1>
+        <p class="description-text">
+            We provide the documents such as Bank statements, paystubs, and id/ssn scans for loans, credit cards, apartments and more. We accept CPNs and will help you get approved based on our knowledge.
+        </p>
+
+        <!-- Filter & Sort Bar -->
+        <div class="filter-sort-bar" onclick="toggleFilterPanel()">
+            <div style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-sliders"></i> Filter and sort</div>
+            <div id="productCount">5 products</div>
+        </div>
+
+        <!-- Filter Controls Dropdown Panel -->
+        <div class="filter-panel" id="filterPanel">
+            <div class="filter-group">
+                <label for="categoryFilter">Filter by Category</label>
+                <select id="categoryFilter" onchange="applyFiltersAndSort()">
+                    <option value="ALL">All Categories</option>
+                    <option value="CPN DOCUMENTS">CPN Documents</option>
+                    <option value="DEALERSHIP">Dealership Documents</option>
+                    <option value="APARTMENT">Apartment Documents</option>
+                    <option value="LOAN DOCUMENTS">Loan Documents</option>
+                    <option value="BUSINESS LOAN">Business Loan Documents</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="sortOrder">Sort Inventory</label>
+                <select id="sortOrder" onchange="applyFiltersAndSort()">
+                    <option value="default">Default Order</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="name">Name: A to Z</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="product-grid" id="docGrid"></div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Nation Credit Lines. All rights reserved. Secure 256-bit SSL Encrypted.</p>
+    </footer>
+
+    <script>
+        const CART_KEY = 'nation_cart';
+
+        const docProducts = [
+            { 
+                id: 301, 
+                title: "CPN Documents for Approvals", 
+                price: 250.00, 
+                category: "CPN DOCUMENTS", 
+                badgeHeader: "NATIONCREDITLINES<br>CPN DOCUMENTS",
+                specs: [
+                    "- DIGITAL ID AND SSN CARD",
+                    "- 3 MONTHS OF BANK STATEMENTS",
+                    "- PAYSTUBS",
+                    "- CREATED UNDER ANY NAME",
+                    "- FOR LOANS AND CAR APPROVALS"
+                ] 
+            },
+            { 
+                id: 302, 
+                title: "Dealership Documents for Approvals", 
+                price: 295.00, 
+                category: "DEALERSHIP", 
+                badgeHeader: "NATIONCREDITLINES<br>DEALERSHIP DOCUMENTS",
+                specs: [
+                    "- HARD COPY ID AND SSN CARD",
+                    "- 3 MONTHS OF BANK STATEMENTS",
+                    "- ZERO DOWN PAYMENT",
+                    "- CREATED UNDER ANY NAME",
+                    "- FOR AUTO LOAN APPROVALS"
+                ] 
+            },
+            { 
+                id: 303, 
+                title: "Apartment Documents for Approvals", 
+                price: 250.00, 
+                category: "APARTMENT", 
+                badgeHeader: "NATIONCREDITLINES<br>APARTMENT DOCUMENTS",
+                specs: [
+                    "- HARD COPY ID AND SSN CARD",
+                    "- 3 MONTHS OF BANK STATEMENTS",
+                    "- PAYSTUBS",
+                    "- CREATED UNDER ANY NAME",
+                    "- FOR LUXURY APARTMENTS"
+                ] 
+            },
+            { 
+                id: 304, 
+                title: "Loan Documents for Approvals", 
+                price: 300.00, 
+                category: "LOAN DOCUMENTS", 
+                badgeHeader: "NATIONCREDITLINES<br>LOAN DOCUMENTS",
+                specs: [
+                    "- DIGITAL ID AND SSN CARD",
+                    "- 3 MONTHS OF BANK STATEMENTS",
+                    "- PAYSTUBS",
+                    "- CREATED UNDER ANY NAME",
+                    "- READY TO USE"
+                ] 
+            },
+            { 
+                id: 305, 
+                title: "Business Loan Documents for Approvals", 
+                price: 300.00, 
+                category: "BUSINESS LOAN", 
+                badgeHeader: "NATIONCREDITLINES<br>BUSINESS DOCUMENTS",
+                specs: [
+                    "- DIGITAL ID AND SSN CARD",
+                    "- 6 MONTHS OF BANK STATEMENTS",
+                    "- TAX RETURNS",
+                    "- CREATED UNDER ANY NAME",
+                    "- FOR BUSINESS FUNDING"
+                ] 
+            }
+        ];
+
+        // Load cart from localStorage using the unified key
+        let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+
+        function saveCart() {
+            localStorage.setItem(CART_KEY, JSON.stringify(cart));
+            updateCartUI();
+        }
+
+        function getProductQty(id) {
+            const item = cart.find(p => p.id === id);
+            return item ? item.qty : 0;
+        }
+
+        function renderProducts(productsToRender) {
+            const grid = document.getElementById('docGrid');
+            if (productsToRender.length === 0) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #9ca3af; padding: 40px;">No documents match your filter criteria.</p>`;
+                document.getElementById('productCount').innerText = '0 products';
+                return;
+            }
+
+            grid.innerHTML = productsToRender.map(p => {
+                const currentQty = getProductQty(p.id);
+                return `
+                    <div class="product-card">
+                        <div>
+                            <div class="card-graphic-container">
+                                <div class="promo-title">${p.badgeHeader}</div>
+                                
+                                <div class="doc-spec-box">
+                                    ${p.specs.map(spec => `<div>${spec}</div>`).join('')}
+                                </div>
+
+                                <div class="simulated-card card-doc">
+                                    <div class="card-top-row">
+                                        <span>VERIFIED BUNDLE</span>
+                                        <i class="fa-solid fa-file-shield"></i>
+                                    </div>
+                                    <div class="card-bottom-row">
+                                        <div>
+                                            <div style="font-size: 8px; opacity: 0.8;">PROCESSING</div>
+                                            <div style="font-size: 11px; font-weight: 800;">FAST DELIVERY</div>
+                                        </div>
+                                        <div style="font-size: 9px; font-weight: 700; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">READY</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="product-info">
+                                <div class="product-title">${p.title}</div>
+                                <div class="product-price">$${p.price.toFixed(2)} USD</div>
+                            </div>
+                        </div>
+                        <div class="qty-box">
+                            <button class="qty-btn" onclick="updateQty(${p.id}, -1)">-</button>
+                            <span class="qty-value" id="qty-${p.id}">${currentQty}</span>
+                            <button class="qty-btn" onclick="updateQty(${p.id}, 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('productCount').innerText = productsToRender.length + ' products';
+        }
+
+        function applyFiltersAndSort() {
+            const categoryVal = document.getElementById('categoryFilter').value;
+            const sortVal = document.getElementById('sortOrder').value;
+
+            let result = [...docProducts];
+
+            if (categoryVal !== 'ALL') {
+                result = result.filter(p => p.category === categoryVal);
+            }
+
+            if (sortVal === 'price-low') {
+                result.sort((a, b) => a.price - b.price);
+            } else if (sortVal === 'price-high') {
+                result.sort((a, b) => b.price - a.price);
+            } else if (sortVal === 'name') {
+                result.sort((a, b) => a.title.localeCompare(b.title));
+            }
+
+            renderProducts(result);
+        }
+
+        function toggleFilterPanel() {
+            const panel = document.getElementById('filterPanel');
+            panel.classList.toggle('open');
+        }
+
+        function updateQty(id, change) {
+            const product = docProducts.find(p => p.id === id);
+            if (!product) return;
+
+            let cartItem = cart.find(item => item.id === id);
+            
+            if (!cartItem) {
+                if (change > 0) {
+                    cart.push({
+                        id: product.id,
+                        title: product.title,
+                        price: product.price,
+                        qty: 1
+                    });
+                }
+            } else {
+                cartItem.qty += change;
+                if (cartItem.qty <= 0) {
+                    cart = cart.filter(item => item.id !== id);
+                }
+            }
+
+            saveCart();
+
+            // Update individual card counter live
+            const qtyEl = document.getElementById(`qty-${id}`);
+            if (qtyEl) {
+                qtyEl.innerText = getProductQty(id);
+            }
+        }
+
+        function toggleMenuDrawer() { document.getElementById('menuDrawer').classList.toggle('open'); updateOverlay(); }
+        function toggleCartDrawer() { document.getElementById('cartDrawer').classList.toggle('open'); updateOverlay(); }
+        
+        function closeAllDrawers() {
+            document.getElementById('menuDrawer').classList.remove('open');
+            document.getElementById('cartDrawer').classList.remove('open');
+            document.getElementById('drawerOverlay').style.display = 'none';
+        }
+
+        function updateOverlay() {
+            const isMenuOpen = document.getElementById('menuDrawer').classList.contains('open');
+            const isCartOpen = document.getElementById('cartDrawer').classList.contains('open');
+            document.getElementById('drawerOverlay').style.display = (isMenuOpen || isCartOpen) ? 'block' : 'none';
+        }
+
+        function updateCartUI() {
+            // Update badge count
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartBadgeCount').innerText = totalCount;
+
+            const cartBody = document.getElementById('cartDrawerBody');
+            if (cart.length === 0) {
+                cartBody.innerHTML = '<p style="color: #9ca3af; font-size: 14px;">Your cart is empty.</p>';
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+            cart.forEach(item => {
+                let itemTotal = item.price * item.qty;
+                total += itemTotal;
+                html += `
+                    <div class="cart-item">
+                        <div>
+                            <div style="font-weight: 600; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${item.title}</div>
+                            <div style="color: #9ca3af;">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
+                        </div>
+                        <div style="font-weight: 700; color: #34d399;">$${itemTotal.toFixed(2)}</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                <div style="margin-top: 20px; border-top: 2px solid #23263a; padding-top: 15px; display: flex; justify-content: space-between; font-weight: 700; font-size: 16px;">
+                    <span>Total:</span>
+                    <span style="color: #34d399;">$${total.toFixed(2)} USD</span>
+                </div>
+                <a href="checkout.html" style="display: block; text-align: center; text-decoration: none; width: 100%; margin-top: 20px; background: #7c3aed; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Proceed to Checkout</a>
+            `;
+            cartBody.innerHTML = html;
+        }
+
+        // Initialize state
+        renderProducts(docProducts);
+        updateCartUI();
+    </script>
+</body>
+</html>
+

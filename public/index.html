@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nation Credit Lines</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --border-color: #23263a;
+            --primary-dark: #0b0b10;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #0b0b10;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 30px;
+            border-bottom: 1px solid #1f2233;
+            background: #0f1016;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .menu-icon {
+            font-size: 20px;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .logo-container {
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cart-icon-wrap {
+            position: relative;
+            cursor: pointer;
+            font-size: 20px;
+            color: #fff;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            background: #7c3aed;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(11,11,16,0.8), rgba(11,11,16,0.8)), url('https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+            border-bottom: 1px solid #1f2233;
+        }
+
+        .hero h4 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            color: #a78bfa;
+            font-weight: 800;
+        }
+
+        .hero h1 {
+            font-size: 38px;
+            margin-bottom: 20px;
+            font-weight: 900;
+            background: linear-gradient(90deg, #fff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .shop-all-btn {
+            background-color: #7c3aed;
+            color: #ffffff;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .shop-all-btn:hover {
+            background-color: #6d28d9;
+        }
+
+        .sub-banner {
+            background-color: #13151f;
+            color: #d1d5db;
+            text-align: center;
+            padding: 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-bottom: 1px solid #1f2233;
+        }
+
+        .section-title {
+            padding: 30px 20px 15px 20px;
+            font-size: 24px;
+            font-weight: 800;
+            max-width: 1400px;
+            margin: 0 auto;
+            color: #fff;
+        }
+
+        /* Products Grid - Uniform Card Layout */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 25px;
+            padding: 0 20px 60px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: #13151f;
+            border: 1px solid #23263a;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            border-color: #7c3aed;
+        }
+
+        .product-image-container {
+            width: 100%;
+            height: 190px;
+            background: #181b2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            border-bottom: 1px solid #23263a;
+        }
+
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.85;
+        }
+
+        /* Standardized Credit Repair Banner Box for the Grid Card */
+        .repair-banner-box {
+            background: #181b2e;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #23263a;
+        }
+
+        .repair-top-text {
+            background: #7c3aed;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            text-align: center;
+            width: 100%;
+            padding: 6px 0;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+        }
+
+        .repair-bureaus {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .bureau-tu { color: #60a5fa; }
+        .bureau-exp { color: #34d399; }
+        .bureau-eq { color: #f87171; }
+
+        .product-info {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .product-subtitle {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #a78bfa;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+
+        .product-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #f3f4f6;
+            line-height: 1.4;
+        }
+
+        .remove-badge-label {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-bottom: 4px;
+        }
+
+        .remove-pill {
+            display: inline-block;
+            background: #1f2233;
+            color: #e5e7eb;
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            border: 1px solid #2d3148;
+        }
+
+        .product-price {
+            font-size: 16px;
+            font-weight: 800;
+            color: #34d399;
+            margin-bottom: 12px;
+        }
+
+        .add-to-cart-btn {
+            width: calc(100% - 32px);
+            margin: 0 16px 16px 16px;
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        .add-to-cart-btn:hover {
+            background: #6d28d9;
+        }
+
+        /* Footer / Quick Links Section */
+        footer {
+            background-color: #090a0f;
+            color: #6b7280;
+            padding: 50px 30px;
+            margin-top: 60px;
+            font-size: 14px;
+            border-top: 1px solid #1f2233;
+            text-align: center;
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-title {
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        /* Cart Slide-Over Drawer */
+        .cart-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1100;
+            backdrop-filter: blur(4px);
+        }
+        .cart-overlay.active { opacity: 1; visibility: visible; }
+
+        .cart-drawer {
+            position: fixed;
+            top: 0; right: -420px; width: 100%; max-width: 400px; height: 100%;
+            background: #13151f; color: #fff; z-index: 1200; display: flex; flex-direction: column;
+            transition: right 0.3s ease;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.5);
+            border-left: 1px solid #23263a;
+        }
+        .cart-drawer.active { right: 0; }
+
+        .cart-drawer-header {
+            padding: 20px; border-bottom: 1px solid #23263a;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .cart-drawer-header h2 { font-size: 18px; font-weight: 700; color: #fff; }
+       
+        .cart-table-headers {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            padding: 12px 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #9ca3af;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #23263a;
+            background: #181b2e;
+        }
+
+        .cart-drawer-body { padding: 0 20px; overflow-y: auto; flex: 1; }
+        .cart-drawer-footer { padding: 20px; border-top: 1px solid #23263a; background: #13151f; }
+
+        .cart-item-row {
+            display: flex;
+            gap: 12px;
+            padding: 16px 0;
+            border-bottom: 1px solid #1f2233;
+            align-items: center;
+        }
+
+        .cart-item-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: #181b2e;
+            border: 1px solid #23263a;
+        }
+
+        .cart-item-details { flex: 1; }
+
+        .cart-item-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .cart-item-price {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 8px;
+        }
+
+        .cart-qty-box {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #2d3148;
+            border-radius: 4px;
+            overflow: hidden;
+            background: #181b2e;
+        }
+
+        .cart-qty-btn {
+            background: #181b2e;
+            border: none;
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .cart-qty-num {
+            width: 30px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .cart-item-total-col {
+            text-align: right;
+            font-weight: 700;
+            font-size: 14px;
+            color: #34d399;
+        }
+
+        .trash-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #9ca3af;
+            margin-left: 8px;
+        }
+        .trash-btn:hover { color: #f87171; }
+
+        .checkout-drawer-btn {
+            width: 100%;
+            background: #7c3aed;
+            color: #fff;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: opacity 0.2s;
+            display: block;
+            text-decoration: none;
+        }
+        .checkout-drawer-btn:hover { opacity: 0.9; color: #fff; }
+
+        /* Menu Drawer & Overlay Styling */
+        .menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); opacity: 0; visibility: hidden;
+            transition: all 0.3s ease; z-index: 1250;
+            backdrop-filter: blur(4px);
+        }
+        .menu-overlay.active { opacity: 1; visibility: visible; }
+
+        .menu-drawer {
+            position: fixed; top: 0; left: -300px; width: 300px; height: 100%;
+            background: #13151f; color: #fff; z-index: 1300; transition: left 0.3s ease;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.5); display: flex; flex-direction: column;
+            border-right: 1px solid #23263a;
+        }
+        .menu-drawer.active { left: 0; }
+
+        .menu-drawer-header {
+            padding: 20px;
+            border-bottom: 1px solid #23263a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .menu-list {
+            list-style: none;
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .menu-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #1f2233;
+        }
+
+        .menu-list li a {
+            text-decoration: none;
+            color: #d1d5db;
+            font-size: 15px;
+            font-weight: 500;
+            display: block;
+        }
+
+        .menu-list li a:hover {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .menu-drawer-footer {
+            padding: 20px;
+            border-top: 1px solid #23263a;
+            background: #181b2e;
+        }
+
+        .menu-drawer-footer a {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        /* Modal styling for Login */
+        .login-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75); opacity: 0; visibility: hidden;
+            transition: all 0.3s ease; z-index: 1400; backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .login-modal-overlay.active { opacity: 1; visibility: visible; }
+
+        .login-modal {
+            background: #13151f;
+            border: 1px solid #23263a;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .login-modal-overlay.active .login-modal { transform: translateY(0); }
+
+        .login-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .login-close-btn:hover { color: #fff; }
+
+        .login-modal h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; color: #fff; }
+        .login-modal p { font-size: 13px; color: #9ca3af; margin-bottom: 24px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #d1d5db; }
+        .form-group input {
+            width: 100%; padding: 12px; background: #181b2e; border: 1px solid #2d3148;
+            border-radius: 8px; color: #fff; font-size: 14px; outline: none;
+        }
+        .form-group input:focus { border-color: #7c3aed; }
+        .login-submit-btn {
+            width: 100%; background: #7c3aed; color: #fff; border: none; padding: 12px;
+            border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 10px;
+        }
+        .login-submit-btn:hover { background: #6d28d9; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="menu-icon" id="menuToggleBtn"><i class="fa-solid fa-bars"></i></div>
+        <div class="logo-container"><i class="fa-solid fa-shield-halved" style="color: #a78bfa;"></i> Nation Credit Lines</div>
+        <div class="cart-icon-wrap" id="cartToggleBtn">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span class="cart-badge" id="cartBadgeCount">0</span>
+        </div>
+    </header>
+
+    <!-- Main Content App Wrapper -->
+    <div id="mainAppContainer">
+        <div id="homeView">
+            <section class="hero">
+                <h4>Opportunity Awaits</h4>
+                <h1>Grow your business with us</h1>
+                <button class="shop-all-btn">Shop all</button>
+            </section>
+
+            <div class="sub-banner">
+                24 Hour Service | Discounted Pricing | Fast Turnaround Time
+            </div>
+
+            <div class="section-title">Proven CPN Bestsellers</div>
+
+            <div class="product-grid" id="productGridContainer">
+                <!-- Products loaded dynamically via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer with Working Quick Links -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-title">Quick links</div>
+            <ul class="footer-links">
+                <li><a href="search.html">Search</a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="terms.html">Terms and Conditions</a></li>
+                <li><a href="refund.html">Refund Policy</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="blogs.html">Blogs</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- Menu Slide-Over Drawer & Overlay -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <div class="menu-drawer" id="menuDrawer">
+        <div class="menu-drawer-header">
+            <span>Menu</span>
+            <div class="menu-icon" id="closeMenuBtn" style="font-size: 18px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+        <ul class="menu-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="tradelines.html">Primary Tradelines</a></li>
+            <li><a href="cpn-packages.html">CPN Packages</a></li>
+            <li><a href="credit-lines.html">Credit Lines</a></li>
+            <li><a href="documents.html">Documents</a></li>
+            <li><a href="blogs.html">Blogs</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+        </ul>
+        <div class="menu-drawer-footer">
+            <a id="openLoginModalBtn"><i class="fa-solid fa-user"></i> Log in</a>
+        </div>
+    </div>
+
+    <!-- Login Modal Overlay -->
+    <div class="login-modal-overlay" id="loginModalOverlay">
+        <div class="login-modal">
+            <button class="login-close-btn" id="closeLoginModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Welcome Back</h2>
+            <p>Log in to manage your orders and account</p>
+            <form onsubmit="event.preventDefault(); alert('Login functionality connected.');">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" required placeholder="name@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="login-submit-btn">Log In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cart Drawer & Overlay -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-drawer-header">
+            <h2>Shopping Cart</h2>
+            <div class="menu-icon" id="closeCartBtn" style="font-size: 18px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+        <div class="cart-table-headers">
+            <div>Product</div>
+            <div style="text-align: right;">Total</div>
+        </div>
+        <div class="cart-drawer-body" id="cartDrawerBody">
+            <!-- Cart items populated here -->
+        </div>
+        <div class="cart-drawer-footer">
+            <a href="checkout.html" class="checkout-drawer-btn" id="proceedCheckoutBtn">Check Out</a>
+        </div>
+    </div>
+
+    <!-- Script logic configuration -->
+    <script>
+        const products = [
+            { 
+                id: 1, 
+                subtitle: "NATION CREDIT LINES",
+                title: "Rapid Credit Repair (Results in 24 Hours)", 
+                price: 250.00, 
+                isCustomRepair: true,
+                removeText: "All Negative Accounts",
+                image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=500&q=80" 
+            },
+            { id: 2, subtitle: "NATION CREDIT LINES", title: "CPN ALL IN ONE PACKAGE", price: 1600.00, image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=500&q=80" },
+            { id: 3, subtitle: "NATION CREDIT LINES", title: "CPN FUNDING PACKAGE - Get up to $30,000 in Credit", price: 275.00, image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=500&q=80" },
+            { id: 4, subtitle: "NATION CREDIT LINES", title: "CPN LOAN PACKAGE", price: 400.00, image: "https://images.unsplash.com/photo-1565372195458-9de0b320ef04?auto=format&fit=crop&w=500&q=80" },
+            { id: 5, subtitle: "NATION CREDIT LINES", title: "CPN MEGA CAR PACKAGE", price: 800.00, image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80" },
+            { id: 6, subtitle: "NATION CREDIT LINES", title: "AMEX APPROVAL PACKAGE (GOLD) CPN Friendly", price: 380.00, image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=500&q=80" },
+            { id: 7, subtitle: "NATION CREDIT LINES", title: "CPN MEGA LOAN PACKAGE", price: 1000.00, image: "https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=500&q=80" },
+            { id: 8, subtitle: "NATION CREDIT LINES", title: "Chase Sapphire Preferred Seasoned Tradeline", price: 650.00, image: "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?auto=format&fit=crop&w=500&q=80" },
+            { id: 9, subtitle: "NATION CREDIT LINES", title: "Verified Proof of Address & Utility Bundle", price: 150.00, image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=500&q=80" }
+        ];
+
+        let cart = JSON.parse(localStorage.getItem('nation_cart')) || [];
+
+        function renderProducts() {
+            const grid = document.getElementById('productGridContainer');
+            grid.innerHTML = products.map(p => {
+                let imageContent = `<img src="${p.image}" alt="${p.title}">`;
+                
+                if (p.isCustomRepair) {
+                    imageContent = `
+                        <div class="repair-banner-box">
+                            <div class="repair-top-text">-BANKRUPTCY -STUDENT LOANS -DEBT AND HARD INQUIRES</div>
+                            <div class="repair-bureaus">
+                                <span class="bureau-tu">TransUnion</span>
+                                <span class="bureau-exp">experian.</span>
+                                <span class="bureau-eq">EQUIFAX</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            ${imageContent}
+                        </div>
+                        <div class="product-info">
+                            <div>
+                                <div class="product-subtitle">${p.subtitle}</div>
+                                <div class="product-title">${p.title}</div>
+                                ${p.isCustomRepair ? `
+                                    <div class="remove-badge-label">Remove the Following</div>
+                                    <div class="remove-pill">${p.removeText}</div>
+                                ` : ''}
+                            </div>
+                            <div>
+                                <div class="product-price">$${p.price.toFixed(2)} USD</div>
+                            </div>
+                        </div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${p.id})">Add to cart</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function saveCart() {
+            localStorage.setItem('nation_cart', JSON.stringify(cart));
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            saveCart();
+            updateCartUI();
+            openCartDrawer();
+        }
+
+        function updateCartUI() {
+            const badge = document.getElementById('cartBadgeCount');
+            const body = document.getElementById('cartDrawerBody');
+           
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            badge.innerText = totalCount;
+
+            if (cart.length === 0) {
+                body.innerHTML = `<p style="text-align:center; color:#9ca3af; padding: 40px 0;">Your cart is empty.</p>`;
+                return;
+            }
+
+            body.innerHTML = cart.map(item => `
+                <div class="cart-item-row">
+                    <img src="${item.image}" class="cart-item-img" alt="${item.title}">
+                    <div class="cart-item-details">
+                        <div class="cart-item-title">${item.title}</div>
+                        <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                        <div class="cart-qty-box">
+                            <button class="cart-qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+                            <span class="cart-qty-num">${item.qty}</span>
+                            <button class="cart-qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="cart-item-total-col">$${(item.price * item.qty).toFixed(2)}</div>
+                        <div style="text-align: right;"><button class="trash-btn" onclick="removeItem(${item.id})"><i class="fa-solid fa-trash"></i></button></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function changeQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.qty += delta;
+                if (item.qty <= 0) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+            }
+            saveCart();
+            updateCartUI();
+        }
+
+        function removeItem(id) {
+            cart = cart.filter(i => i.id !== id);
+            saveCart();
+            updateCartUI();
+        }
+
+        // Drawer Controllers
+        function openCartDrawer() {
+            document.getElementById('cartDrawer').classList.add('active');
+            document.getElementById('cartOverlay').classList.add('active');
+        }
+
+        function closeCartDrawer() {
+            document.getElementById('cartDrawer').classList.remove('active');
+            document.getElementById('cartOverlay').classList.remove('active');
+        }
+
+        function openMenuDrawer() {
+            document.getElementById('menuDrawer').classList.add('active');
+            document.getElementById('menuOverlay').classList.add('active');
+        }
+
+        function closeMenuDrawer() {
+            document.getElementById('menuDrawer').classList.remove('active');
+            document.getElementById('menuOverlay').classList.remove('active');
+        }
+
+        function openLoginModal() {
+            closeMenuDrawer();
+            document.getElementById('loginModalOverlay').classList.add('active');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModalOverlay').classList.remove('active');
+        }
+
+        // Event Listeners
+        document.getElementById('cartToggleBtn').addEventListener('click', openCartDrawer);
+        document.getElementById('closeCartBtn').addEventListener('click', closeCartDrawer);
+        document.getElementById('cartOverlay').addEventListener('click', closeCartDrawer);
+
+        document.getElementById('menuToggleBtn').addEventListener('click', openMenuDrawer);
+        document.getElementById('closeMenuBtn').addEventListener('click', closeMenuDrawer);
+        document.getElementById('menuOverlay').addEventListener('click', closeMenuDrawer);
+
+        document.getElementById('openLoginModalBtn').addEventListener('click', openLoginModal);
+        document.getElementById('closeLoginModalBtn').addEventListener('click', closeLoginModal);
+        document.getElementById('loginModalOverlay').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('loginModalOverlay')) closeLoginModal();
+        });
+
+        // Initialize Storefront & Cart badge count on load
+        renderProducts();
+        updateCartUI();
+    </script>
+</body>
+</html>

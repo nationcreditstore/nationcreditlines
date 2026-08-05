@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Nation Credit Lines</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #0b0b10; color: #ffffff; overflow-x: hidden; }
+       
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 18px 30px; border-bottom: 1px solid #1f2233; background: #0f1016; position: sticky; top: 0; z-index: 1000; }
+        .logo-container { font-weight: 700; font-size: 16px; text-decoration: none; color: #fff; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+       
+        /* Content Wrapper */
+        .page-content-wrapper { max-width: 1200px; margin: 0 auto; padding: 50px 20px; }
+        .main-heading { font-size: 32px; font-weight: 800; margin-bottom: 10px; color: #fff; text-align: center; background: linear-gradient(90deg, #fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sub-heading { font-size: 14px; color: #9ca3af; text-align: center; margin-bottom: 50px; }
+
+        /* Contact Grid Layout */
+        .contact-grid { display: grid; grid-template-columns: 1fr; gap: 40px; }
+        @media (min-width: 900px) { .contact-grid { grid-template-columns: 1fr 1.5fr; align-items: start; } }
+
+        /* Contact Info Cards */
+        .contact-info-col { display: flex; flex-direction: column; gap: 20px; }
+        .info-card { background: #13151f; border: 1px solid #23263a; border-radius: 16px; padding: 25px; display: flex; align-items: flex-start; gap: 20px; transition: border-color 0.2s; }
+        .info-card:hover { border-color: #7c3aed; }
+        .info-icon { width: 45px; height: 45px; background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #a78bfa; font-size: 18px; flex-shrink: 0; }
+        .info-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .info-detail { font-size: 13px; color: #9ca3af; line-height: 1.5; word-break: break-all; }
+        .info-detail a { color: #a78bfa; text-decoration: none; }
+        .info-detail a:hover { text-decoration: underline; }
+
+        /* Contact Form Card */
+        .form-card { background: #13151f; border: 1px solid #23263a; border-radius: 16px; padding: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .form-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        .form-desc { font-size: 13px; color: #9ca3af; margin-bottom: 25px; }
+       
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: #d1d5db; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input, .form-textarea { width: 100%; padding: 14px 18px; background: #0b0b10; border: 1px solid #23263a; border-radius: 10px; color: #fff; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .form-input:focus, .form-textarea:focus { border-color: #7c3aed; }
+        .form-textarea { resize: vertical; min-height: 130px; }
+
+        .submit-btn { width: 100%; padding: 15px; background: #7c3aed; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .submit-btn:hover { background: #6d28d9; }
+        .submit-btn:active { transform: scale(0.99); }
+
+        /* Success Alert State */
+        .success-alert { display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; padding: 15px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 20px; align-items: center; gap: 10px; }
+
+        /* Cart Item Styling in Drawer */
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #1f2233; padding-bottom: 10px; font-size: 13px; color: #d1d5db; }
+
+        /* Drawers */
+        .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 2000; backdrop-filter: blur(4px); }
+        .drawer { position: fixed; top: 0; left: -320px; width: 300px; height: 100%; background: #13151f; color: #fff; box-shadow: 4px 0 15px rgba(0,0,0,0.5); z-index: 2001; transition: left 0.3s ease; display: flex; flex-direction: column; border-right: 1px solid #23263a; }
+        .drawer.right { left: auto; right: -320px; border-right: none; border-left: 1px solid #23263a; }
+        .drawer.open { left: 0; }
+        .drawer.right.open { right: 0; }
+       
+        .drawer-header { padding: 20px; border-bottom: 1px solid #23263a; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 18px; }
+        .drawer-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #9ca3af; }
+        .drawer-body { padding: 20px; overflow-y: auto; flex: 1; }
+       
+        .menu-list { list-style: none; padding: 0; }
+        .menu-list li { padding: 12px 0; border-bottom: 1px solid #1f2233; }
+        .menu-list li a { text-decoration: none; color: #d1d5db; font-size: 15px; font-weight: 500; display: block; }
+        .menu-list li a:hover { color: #fff; }
+
+        footer { background-color: #090a0f; color: #6b7280; padding: 50px 30px; margin-top: 60px; font-size: 14px; border-top: 1px solid #1f2233; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeAllDrawers()"></div>
+
+    <!-- Menu Drawer -->
+    <div class="drawer" id="menuDrawer">
+        <div class="drawer-header">
+            <span>Menu</span>
+            <button class="drawer-close" onclick="toggleMenuDrawer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-body">
+            <ul class="menu-list">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="tradelines.html">Primary Tradelines</a></li>
+                <li><a href="cpn.html">CPN Packages</a></li>
+                <li><a href="credit-lines.html">Credit Lines</a></li>
+                <li><a href="documents.html">Documents</a></li>
+                <li><a href="blogs.html">Blogs</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div class="drawer right" id="cartDrawer">
+        <div class="drawer-header">
+            <span>Your Cart</span>
+            <button class="drawer-close" onclick="toggleCartDrawer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-body" id="cartDrawerBody">
+            <p style="color: #9ca3af; font-size: 14px;">Your cart is empty.</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div style="font-size: 20px; cursor: pointer;" onclick="toggleMenuDrawer()"><i class="fa-solid fa-bars"></i></div>
+        <a href="index.html" class="logo-container">
+            <i class="fa-solid fa-shield-halved" style="color: #a78bfa;"></i> NATIONCREDITLINES
+        </a>
+        <div style="position: relative; cursor: pointer; font-size: 20px;" onclick="toggleCartDrawer()">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span id="cartBadgeCount" style="position: absolute; top: -6px; right: -8px; background: #7c3aed; color: white; font-size: 10px; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">0</span>
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-content-wrapper">
+        <h1 class="main-heading">Get in Touch</h1>
+        <p class="sub-heading">Have questions about our tradelines or packages? Reach out to our support team directly.</p>
+
+        <div class="contact-grid">
+            <!-- Contact Info Column -->
+            <div class="contact-info-col">
+                <div class="info-card">
+                    <div class="info-icon"><i class="fa-solid fa-envelope"></i></div>
+                    <div>
+                        <div class="info-title">Email Us Directly</div>
+                        <div class="info-detail"><a href="mailto:Charlesmicheal181@gmail.com">Charlesmicheal181@gmail.com</a></div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon"><i class="fa-solid fa-clock"></i></div>
+                    <div>
+                        <div class="info-title">Support Hours</div>
+                        <div class="info-detail">Monday – Sunday: 24/7 Online Support & Order Processing</div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div>
+                        <div class="info-title">Secure & Confidential</div>
+                        <div class="info-detail">All communications and client inquiries are protected with 256-bit SSL encryption.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Form Column -->
+            <div class="form-card">
+                <div class="form-title">Send Us a Message</div>
+                <div class="form-desc">Fill out the form below and our team will get back to your inbox promptly.</div>
+
+                <div class="success-alert" id="successAlert">
+                    <i class="fa-solid fa-circle-check" style="font-size: 16px;"></i>
+                    <span>Your message has been sent successfully! We will reach out via email shortly.</span>
+                </div>
+
+                <form id="contactForm" onsubmit="handleContactSubmit(event)">
+                    <div class="form-group">
+                        <label class="form-label">Your Name</label>
+                        <input type="text" class="form-input" id="senderName" placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-input" id="senderEmail" placeholder="Enter your email address" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Subject</label>
+                        <input type="text" class="form-input" id="senderSubject" placeholder="e.g. Inquiry regarding CPN Packages" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-textarea" id="senderMessage" placeholder="Type your message here..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <span>Send Message</span> <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Nation Credit Lines. All rights reserved. Secure 256-bit SSL Encrypted.</p>
+    </footer>
+
+    <script>
+        const CART_KEY = 'nation_cart';
+        let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+
+        function updateCartUI() {
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartBadgeCount').innerText = totalCount;
+
+            const cartBody = document.getElementById('cartDrawerBody');
+            if (cart.length === 0) {
+                cartBody.innerHTML = '<p style="color: #9ca3af; font-size: 14px;">Your cart is empty.</p>';
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+            cart.forEach(item => {
+                let itemTotal = item.price * item.qty;
+                total += itemTotal;
+                html += `
+                    <div class="cart-item">
+                        <div>
+                            <div style="font-weight: 600; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${item.title}</div>
+                            <div style="color: #9ca3af;">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
+                        </div>
+                        <div style="font-weight: 700; color: #34d399;">$${itemTotal.toFixed(2)}</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                <div style="margin-top: 20px; border-top: 2px solid #23263a; padding-top: 15px; display: flex; justify-content: space-between; font-weight: 700; font-size: 16px;">
+                    <span>Total:</span>
+                    <span style="color: #34d399;">$${total.toFixed(2)} USD</span>
+                </div>
+                <a href="checkout.html" style="display: block; text-align: center; text-decoration: none; width: 100%; margin-top: 20px; background: #7c3aed; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Proceed to Checkout</a>
+            `;
+            cartBody.innerHTML = html;
+        }
+
+        function handleContactSubmit(event) {
+            event.preventDefault();
+           
+            // Show success alert
+            const alertBox = document.getElementById('successAlert');
+            alertBox.style.display = 'flex';
+
+            // Reset form fields
+            document.getElementById('contactForm').reset();
+
+            // Hide alert after 5 seconds
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        function toggleMenuDrawer() { document.getElementById('menuDrawer').classList.toggle('open'); updateOverlay(); }
+        function toggleCartDrawer() { document.getElementById('cartDrawer').classList.toggle('open'); updateOverlay(); }
+       
+        function closeAllDrawers() {
+            document.getElementById('menuDrawer').classList.remove('open');
+            document.getElementById('cartDrawer').classList.remove('open');
+            document.getElementById('drawerOverlay').style.display = 'none';
+        }
+
+        function updateOverlay() {
+            const isMenuOpen = document.getElementById('menuDrawer').classList.contains('open');
+            const isCartOpen = document.getElementById('cartDrawer').classList.contains('open');
+            document.getElementById('drawerOverlay').style.display = (isMenuOpen || isCartOpen) ? 'block' : 'none';
+        }
+
+        // Initialize Cart UI on Load
+        updateCartUI();
+    </script>
+</body>
+</html>
