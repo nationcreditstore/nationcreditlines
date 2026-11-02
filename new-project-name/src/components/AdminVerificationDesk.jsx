@@ -1,80 +1,59 @@
 import React from 'react';
 
-export default function AdminVerificationDesk({ transactions, onAdminAction }) {
+export default function AdminVerificationDesk({ transactions, onAdminAction, isAdmin }) {
+  if (!isAdmin) return null;
+
   return (
-    <div className="bg-[#121824] border border-slate-700/80 rounded-2xl p-6 mt-6 text-white shadow-xl max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-          Admin Verification Desk
-        </h3>
-        <span className="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">
-          Pending Requests: {transactions.filter(t => t.status === 'Pending Verification').length}
+    <div className="bg-[#0D121F] p-6 rounded-3xl border border-amber-500/30 space-y-6 shadow-xl">
+      <div>
+        <span className="text-[10px] font-black uppercase text-amber-400 tracking-widest block mb-1">
+          Control Center
         </span>
+        <h3 className="text-xl font-black text-white">Admin Verification & Management Desk</h3>
+        <p className="text-xs text-gray-400">Review pending user deposits, withdrawals, and monitor account tiers.</p>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm text-slate-300">
-          <thead className="bg-[#1e293b] text-xs uppercase text-slate-400 border-b border-slate-700">
-            <tr>
-              <th className="p-3">User Email</th>
-              <th className="p-3">Type</th>
-              <th className="p-3">Amount</th>
-              <th className="p-3">Method</th>
-              <th className="p-3">Date</th>
-              <th className="p-3">Status</th>
-              <th className="p-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800">
-            {transactions.length === 0 ? (
-              <tr>
-                <td colSpan="7" className="text-center py-6 text-slate-500">
-                  No transactions recorded yet.
-                </td>
-              </tr>
-            ) : (
-              transactions.map((tx) => (
-                <tr key={tx.id} className="hover:bg-slate-800/40 transition">
-                  <td className="p-3 text-slate-300 text-xs font-mono">{tx.userEmail || 'N/A'}</td>
-                  <td className="p-3 font-medium text-white">{tx.type}</td>
-                  <td className="p-3 text-emerald-400 font-semibold">${Number(tx.amount).toFixed(2)}</td>
-                  <td className="p-3 text-slate-400">{tx.method}</td>
-                  <td className="p-3 text-slate-400 text-xs">{tx.date}</td>
-                  <td className="p-3">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      tx.status === 'Approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                      tx.status === 'Rejected' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
-                      'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                    }`}>
-                      {tx.status}
+      <div className="space-y-4">
+        <h4 className="text-sm font-black text-white uppercase tracking-wider">Pending Transaction Requests</h4>
+        
+        {transactions.filter(t => t.status?.includes('Pending')).length === 0 ? (
+          <div className="text-center py-6 text-gray-500 text-xs bg-[#06080F] rounded-2xl border border-white/5">
+            No pending transaction requests at this time.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {transactions.filter(t => t.status?.includes('Pending')).map(tx => (
+              <div key={tx.id} className="bg-[#06080F] p-4 rounded-2xl border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                      {tx.type}
                     </span>
-                  </td>
-                  <td className="p-3 text-right space-x-2">
-                    {tx.status === 'Pending Verification' ? (
-                      <>
-                        <button
-                          onClick={() => onAdminAction(tx.id, 'Approve')}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-xs font-medium transition"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => onAdminAction(tx.id, 'Reject')}
-                          className="bg-rose-600 hover:bg-rose-500 text-white px-3 py-1 rounded text-xs font-medium transition"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    ) : (
-                      <span className="text-xs text-slate-500 italic">Completed</span>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                    <span className="text-sm font-bold text-white">${Number(tx.amount).toFixed(2)}</span>
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    User: <strong className="text-white">{tx.userEmail}</strong> • Method: {tx.method} • {tx.date}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => onAdminAction(tx.id, 'Approve')}
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-400 font-extrabold text-xs border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => onAdminAction(tx.id, 'Reject')}
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-rose-500/20 text-rose-400 font-extrabold text-xs border border-rose-500/30 hover:bg-rose-500/30 transition-colors"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

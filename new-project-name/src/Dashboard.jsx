@@ -20,19 +20,23 @@ export default function Dashboard({
   getConvertedValue,
   setDashboardModal
 }) {
+  // Helper variable to retrieve the correct user display name across different auth schemas
+  const displayName = userProfile?.fullName || userProfile?.full_name || userProfile?.name || 'Ayomide';
+  const displayInitial = displayName ? displayName.charAt(0).toUpperCase() : 'A';
+
   return (
     <div className="max-w-md mx-auto px-3 py-4 space-y-4 text-white font-sans">
-      
+     
       {/* Top User Header Bar */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center cursor-pointer">☰</div>
         </div>
         <div className="text-xs font-bold text-gray-300 tracking-wider flex items-center gap-1">
-          {userProfile?.fullName || 'Trader'} <span className="text-emerald-400">✓</span>
+          {displayName} <span className="text-emerald-400">✓</span>
         </div>
         <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">
-          {userProfile?.fullName ? userProfile.fullName.charAt(0).toUpperCase() : 'T'}
+          {displayInitial}
         </div>
       </div>
 
@@ -50,12 +54,12 @@ export default function Dashboard({
           {/* Balance Card */}
           <div className="bg-[#0D121F] p-5 rounded-3xl border border-white/10 relative overflow-hidden shadow-2xl">
             <span className="text-xs text-gray-400 font-medium block mb-1">Real Account Balance ⇄</span>
-            <div className="text-3xl font-black tracking-tight mb-4">USD {balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-            
+            <div className="text-3xl font-black tracking-tight mb-4">USD {balance ? balance.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}</div>
+           
             <div className="grid grid-cols-3 gap-2">
-              <button onClick={() => setDashboardModal('deposit')} className="py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-400 text-xs font-extrabold transition-all">Deposit</button>
-              <button onClick={() => setDashboardModal('withdraw')} className="py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold transition-all">Withdraw</button>
-              <button onClick={() => setDashboardModal('upgrade')} className="py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold transition-all">Upgrade</button>
+              <button onClick={() => setDashboardModal && setDashboardModal('deposit')} className="py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-400 text-xs font-extrabold transition-all">Deposit</button>
+              <button onClick={() => setDashboardModal && setDashboardModal('withdraw')} className="py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold transition-all">Withdraw</button>
+              <button onClick={() => setDashboardModal && setDashboardModal('upgrade')} className="py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold transition-all">Upgrade</button>
             </div>
           </div>
 
@@ -116,7 +120,7 @@ export default function Dashboard({
                 { name: "EUR/USD", symbol: "EURUSD", category: "Forex Major", risk: "Low", price: "$1.1486", change: "+0.07%", isUp: true, icon: "€", color: "text-blue-300", bg: "bg-blue-500/20" },
                 { name: "GBP/USD", symbol: "GBPUSD", category: "Forex Major", risk: "Medium", price: "$1.3210", change: "+0.14%", isUp: true, icon: "£", color: "text-purple-300", bg: "bg-purple-500/20" },
                 { name: "USD/JPY", symbol: "USDJPY", category: "Forex Major", risk: "Low", price: "$142.50", change: "-0.22%", isUp: false, icon: "¥", color: "text-red-300", bg: "bg-red-500/20" },
-                { name: "AUD/USD", symbol: "AUDUSD", category: "Forex Major", risk: "Medium", price: "$0.6780", change: "+0.25\%", isUp: true, icon: "$", color: "text-green-300", bg: "bg-green-500/20" },
+                { name: "AUD/USD", symbol: "AUDUSD", category: "Forex Major", risk: "Medium", price: "$0.6780", change: "+0.25%", isUp: true, icon: "$", color: "text-green-300", bg: "bg-green-500/20" },
                 { name: "Gold", symbol: "XAUUSD", category: "Commodities", risk: "Low", price: "$2,580.40", change: "+0.65%", isUp: true, icon: "🥇", color: "text-yellow-400", bg: "bg-yellow-500/20" },
                 { name: "Silver", symbol: "XAGUSD", category: "Commodities", risk: "Medium", price: "$30.80", change: "+1.10%", isUp: true, icon: "🥈", color: "text-gray-300", bg: "bg-gray-500/20" },
                 { name: "Crude Oil", symbol: "BRENT", category: "Energy", risk: "High", price: "$74.20", change: "-1.15%", isUp: false, icon: "🛢", color: "text-slate-400", bg: "bg-slate-600/20" },
@@ -144,7 +148,7 @@ export default function Dashboard({
                     <div className="text-xs font-black text-white">{asset.price}</div>
                     <div className="flex items-center justify-end gap-2 mt-1">
                       <span className={`text-[10px] font-bold ${asset.isUp ? 'text-emerald-400' : 'text-rose-400'}`}>{asset.change}</span>
-                      <button 
+                      <button
                         onClick={() => setDashboardModal && setDashboardModal('deposit')}
                         className="px-3 py-1 rounded-lg bg-emerald-400 text-black font-extrabold text-[10px] shadow-sm hover:brightness-110 transition-all"
                       >
@@ -207,7 +211,7 @@ export default function Dashboard({
           ) : (
             <div className="text-center py-10">
               <p className="text-xs text-gray-400 mb-3">Your account balance is $0.00. Active trades unlock upon approved deposits.</p>
-              <button onClick={() => setDashboardModal('deposit')} className="px-4 py-2 bg-emerald-400 text-black font-extrabold text-xs rounded-xl">Request Deposit</button>
+              <button onClick={() => setDashboardModal && setDashboardModal('deposit')} className="px-4 py-2 bg-emerald-400 text-black font-extrabold text-xs rounded-xl">Request Deposit</button>
             </div>
           )}
         </div>
